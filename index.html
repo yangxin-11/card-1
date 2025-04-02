@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI快速生成精美卡片</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --minimalist-primary: #1a1a1a;
+      --minimalist-secondary: #4a4a4a;
+      --vintage-primary: #2C1810;
+      --vintage-secondary: #8B4513;
+      --gradient-start: #f6e6d5;
+      --gradient-end: #ffffff;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      min-height: 100vh;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: #2C1810;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      letter-spacing: 1px;
+    }
+
+    /* 新增副标题样式 */
+    .page-subtitle {
+      text-align: center;
+      font-size: 1.125rem;
+      color: #555;
+      margin-bottom: 2rem;
+    }
+
+    .input-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 2.5rem;
+    }
+
+    .input-field {
+      border: 2px solid #e2e2e2;
+      border-radius: 12px;
+      padding: 12px 16px;
+      width: 100%;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .input-field:focus {
+      border-color: #8B4513;
+      box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+      outline: none;
+    }
+
+    .input-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--vintage-primary);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover::after {
+      transform: translateY(-100%);
+    }
+
+    .minimalist-btn {
+      background: var(--minimalist-primary);
+      color: white;
+    }
+
+    .vintage-btn {
+      background: var(--vintage-secondary);
+      color: white;
+    }
+    
+    /* 新增按钮样式 */
+    .scandi-btn {
+      background: #A5C9CA;
+      color: white;
+    }
+    
+    .artdeco-btn {
+      background: #1A1A1A;
+      color: #D4AF37;
+    }
+
+    .generate-btn {
+      background: linear-gradient(135deg, #2C1810, #8B4513);
+      color: white;
+      width: 100%;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+    }
+
+    .card-container {
+      width: 440px;
+      max-height: 1280px;
+      margin: 2rem auto;
+      transition: all 0.5s ease;
+    }
+
+    .minimalist {
+      background: white;
+      color: var(--minimalist-primary);
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .vintage {
+      background: #F5E6D3;
+      color: var(--vintage-primary);
+      font-family: 'Noto Serif SC', serif;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(139, 69, 19, 0.15);
+      position: relative;
+    }
+
+    .vintage::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 2px solid rgba(139, 69, 19, 0.2);
+      border-radius: 15px;
+      pointer-events: none;
+    }
+
+    .card-date {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: #8B4513;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .card-subtitle {
+      font-size: 1.25rem;
+      color: var(--vintage-secondary);
+      margin-bottom: 2rem;
+    }
+
+    .quote-block {
+      border-left: 4px solid #8B4513;
+      padding: 1rem 0 1rem 1.5rem;
+      margin: 2rem 0;
+      font-style: italic;
+    }
+
+    .points-list {
+      margin: 2rem 0;
+    }
+
+    .points-list li {
+      display: flex;
+      align-items: start;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    .points-list i {
+      color: #8B4513;
+      margin-right: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    .notes-section {
+      background: rgba(139, 69, 19, 0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .qr-section {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .qr-section img {
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    /* 文件上传样式 */
+    .file-input-wrapper {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .file-input-label {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #f3f4f6;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-input-label:hover {
+      background: #e5e7eb;
+    }
+
+    #qrcode {
+      display: none;
+    }
+    
+    /* ----------------- 新增样式：斯堪的纳维亚风格 ----------------- */
+    :root {
+      --scandi-blue: #A5C9CA;
+      --scandi-gray: #E7E7E7;
+      --scandi-wood: #D4C5B2;
+    }
+    .scandi {
+      background: white;
+      font-family: 'Noto Sans SC', sans-serif;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .scandi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .scandi-title {
+      color: var(--scandi-blue);
+      letter-spacing: 2px;
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+    }
+    .scandi-subtitle {
+      color: #555;
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+    }
+    .scandi-line {
+      height: 1px;
+      background: var(--scandi-gray);
+      margin-bottom: 1.5rem;
+    }
+    .scandi-quote {
+      border-left: 2px solid var(--scandi-wood);
+      padding-left: 1rem;
+      color: #555;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+    .scandi-list {
+      margin-bottom: 1.5rem;
+      color: #444;
+    }
+    .scandi-list li {
+      display: flex;
+      align-items: start;
+      margin-bottom: 0.75rem;
+    }
+    .scandi-list li span:first-child {
+      margin-right: 0.5rem;
+      color: var(--scandi-blue);
+    }
+    .scandi-note {
+      background: var(--scandi-gray);
+      padding: 1rem;
+      border-radius: 8px;
+      color: #555;
+      font-size: 0.875rem;
+    }
+    
+    /* ----------------- 新增样式：艺术装饰风格 ----------------- */
+    :root {
+      --artdeco-gold: #D4AF37;
+      --artdeco-black: #1A1A1A;
+    }
+    .artdeco {
+      background: var(--artdeco-black);
+      color: white;
+      font-family: 'Noto Serif SC', serif;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .artdeco::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(30deg, var(--artdeco-gold) 12%, transparent 12.5%, transparent 87%, var(--artdeco-gold) 87.5%, var(--artdeco-gold)),
+                        linear-gradient(150deg, var(--artdeco-gold) 12%, transparent 12.5%, transparent 87%, var(--artdeco-gold) 87.5%, var(--artdeco-gold));
+      background-size: 20px 35px;
+      background-position: 0 0, 0 0;
+      opacity: 0.1;
+    }
+    .artdeco-content {
+      position: relative;
+      z-index: 1;
+    }
+    .artdeco-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      color: var(--artdeco-gold);
+    }
+    .artdeco-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .artdeco-subtitle {
+      font-size: 1.125rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .artdeco-quote {
+      border-left: 2px solid var(--artdeco-gold);
+      padding-left: 1rem;
+      font-style: italic;
+      margin: 1.5rem 0;
+    }
+    .artdeco-list {
+      margin-bottom: 1.5rem;
+    }
+    .artdeco-list li {
+      display: flex;
+      align-items: start;
+      margin-bottom: 0.75rem;
+    }
+    .artdeco-list li span:first-child {
+      margin-right: 0.5rem;
+      color: var(--artdeco-gold);
+    }
+    .artdeco-note {
+      border: 1px solid var(--artdeco-gold);
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body class="p-8">
+  <h1 class="page-title">AI快速生成精美卡片</h1>
+  <h2 class="page-subtitle">创建并分享你的精美卡片，展示你的创意和想法</h2>
+  
+  <div class="container mx-auto flex flex-col md:flex-row gap-4">
+    <!-- 左侧：输入表单 -->
+    <div class="w-full md:w-1/2 p-4">
+      <div class="input-container">
+        <label class="input-label">标题</label>
+        <input type="text" class="input-field" placeholder="输入标题..." id="title">
+        
+        <label class="input-label">副标题</label>
+        <input type="text" class="input-field" placeholder="输入副标题..." id="subtitle">
+        
+        <label class="input-label">引用内容</label>
+        <textarea class="input-field" placeholder="输入引用内容..." id="quote" rows="3"></textarea>
+        
+        <label class="input-label">核心要点</label>
+        <textarea class="input-field" placeholder="每行输入一个要点..." id="points" rows="4"></textarea>
+        
+        <label class="input-label">编辑笔记</label>
+        <textarea class="input-field" placeholder="输入编辑笔记..." id="notes" rows="2"></textarea>
+        
+        <div class="file-input-wrapper">
+          <label class="input-label">二维码图片</label>
+          <label class="file-input-label" for="qrcode">
+            <i class="fas fa-upload mr-2"></i>选择图片
+          </label>
+          <input type="file" id="qrcode" accept="image/*">
+        </div>
+        
+        <div class="flex space-x-4 mb-4">
+          <button onclick="setStyle('minimalist')" class="btn minimalist-btn flex-1">
+            <i class="fas fa-minus mr-2"></i>极简主义
+          </button>
+          <button onclick="setStyle('vintage')" class="btn vintage-btn flex-1">
+            <i class="fas fa-scroll mr-2"></i>优雅复古
+          </button>
+          <!-- 新增风格按钮 -->
+          <button onclick="setStyle('scandi')" class="btn scandi-btn flex-1">
+            <i class="fas fa-igloo mr-2"></i>斯堪的纳维亚
+          </button>
+          <button onclick="setStyle('artdeco')" class="btn artdeco-btn flex-1">
+            <i class="fas fa-gem mr-2"></i>艺术装饰
+          </button>
+        </div>
+        
+        <button onclick="generateCard()" class="btn generate-btn">
+          <i class="fas fa-wand-magic-sparkles mr-2"></i>生成卡片
+        </button>
+      </div>
+    </div>
+    
+    <!-- 右侧：生成的卡片显示 -->
+    <div class="w-full md:w-1/2 p-4">
+      <div id="cardOutput" class="card-container hidden"></div>
+    </div>
+  </div>
+  
+  <script>
+    let currentStyle = 'minimalist';
+    let qrCodeDataUrl = '';
+
+    function setStyle(style) {
+      currentStyle = style;
+      document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('ring-2', 'ring-blue-400'));
+      event.target.classList.add('ring-2', 'ring-blue-400');
+      updatePreviewCard();
+    }
+
+    document.getElementById('qrcode').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          qrCodeDataUrl = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function generateCard() {
+      const title = document.getElementById('title').value;
+      const subtitle = document.getElementById('subtitle').value;
+      const quote = document.getElementById('quote').value;
+      const points = document.getElementById('points').value.split('\n').filter(p => p.trim());
+      const notes = document.getElementById('notes').value;
+      const date = new Date().toLocaleDateString('zh-CN');
+
+      let cardHtml = '';
+      // 保留原有极简主义和优雅复古风格不变
+      if(currentStyle === 'minimalist' || currentStyle === 'vintage'){
+        cardHtml = `
+          <div class="${currentStyle} animate-fade-in">
+            <div class="card-date">
+              ${date}
+            </div>
+            <h1 class="card-title">${title}</h1>
+            <h2 class="card-subtitle">${subtitle}</h2>
+            
+            <div class="quote-block">
+              <p>${quote}</p>
+            </div>
+
+            <ul class="points-list">
+              ${points.map(point => `
+                <li>
+                  <i class="fas fa-feather"></i>
+                  <span>${point}</span>
+                </li>
+              `).join('')}
+            </ul>
+
+            <div class="notes-section">
+              <h3 class="font-bold mb-3">编辑笔记</h3>
+              <p>${notes}</p>
+            </div>
+
+            ${qrCodeDataUrl ? `
+              <div class="qr-section">
+                <img src="${qrCodeDataUrl}" alt="QR Code" class="w-32 h-32">
+              </div>
+            ` : ''}
+          </div>
+        `;
+      } else if(currentStyle === 'scandi'){
+        cardHtml = `
+          <div class="scandi animate-fade-in">
+            <div class="scandi-header">
+              <div class="text-sm text-gray-400 tracking-wider">PHOTOGRAPHIE</div>
+              <div class="text-sm text-gray-400">${date}</div>
+            </div>
+            <h1 class="scandi-title">${title || "摄影的艺术"}</h1>
+            <h2 class="scandi-subtitle">${subtitle || "光影与构图的永恒魅力"}</h2>
+            <div class="scandi-line"></div>
+            <blockquote class="scandi-quote">${quote || "\"摄影不仅是捕捉瞬间，而是创造永恒。\""}</blockquote>
+            <ul class="scandi-list">
+              ${ (points.length ? points : [
+                   "01 摄影是光影的艺术，掌握光线是创作好照片的关键",
+                   "02 构图是视觉语言，通过空间关系传达情感与故事",
+                   "03 数码技术改变了摄影工具，但不改变摄影的本质",
+                   "04 真正的摄影眼光将在视觉饱和的时代成为宝贵能力"
+                 ]).map(point => {
+                   let parts = point.split(' ');
+                   let num = parts.shift();
+                   return `<li><span>${num}</span><span>${parts.join(' ')}</span></li>`;
+                 }).join('')}
+            </ul>
+            <div class="scandi-note">编辑笔记: ${notes || "在图像泛滥的数字时代，摄影的形式在变，但作为记录与表达的方式，其艺术本质不变。"}</div>
+            ${qrCodeDataUrl ? `<div class="qr-section"><img src="${qrCodeDataUrl}" alt="QR Code" class="w-32 h-32"></div>` : ''}
+          </div>
+        `;
+      } else if(currentStyle === 'artdeco'){
+        cardHtml = `
+          <div class="artdeco animate-fade-in">
+            <div class="artdeco-content">
+              <div class="artdeco-header">
+                <div class="text-sm tracking-widest">L'ART DE LA PHOTOGRAPHIE</div>
+                <div class="text-sm">${date}</div>
+              </div>
+              <div class="artdeco-border p-6">
+                <h1 class="artdeco-title">${title || "摄影的艺术"}</h1>
+                <h2 class="artdeco-subtitle">${subtitle || "光影与构图的永恒魅力"}</h2>
+                <blockquote class="artdeco-quote">${quote || "\"摄影不仅是捕捉瞬间，而是创造永恒。\""}</blockquote>
+                <ul class="artdeco-list">
+                  ${ (points.length ? points : [
+                       "01 摄影是光影的艺术，掌握光线是创作好照片的关键",
+                       "02 构图是视觉语言，通过空间关系传达情感与故事",
+                       "03 数码技术改变了摄影工具，但不改变摄影的本质",
+                       "04 真正的摄影眼光将在视觉饱和的时代成为宝贵能力"
+                     ]).map(point => {
+                       let parts = point.split(' ');
+                       let num = parts.shift();
+                       return `<li><span>${num}</span><span>${parts.join(' ')}</span></li>`;
+                     }).join('')}
+                </ul>
+                <div class="artdeco-note">Editor's Note: ${notes || "在图像泛滥的数字时代，摄影的形式在变，但作为记录与表达的方式，其艺术本质不变。"}</div>
+              </div>
+            </div>
+            ${qrCodeDataUrl ? `<div class="qr-section"><img src="${qrCodeDataUrl}" alt="QR Code" class="w-32 h-32"></div>` : ''}
+          </div>
+        `;
+      }
+
+      const output = document.getElementById('cardOutput');
+      output.innerHTML = cardHtml;
+      output.classList.remove('hidden');
+      output.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function generateDefaultCard() {
+      const title = "摄影的艺术";
+      const subtitle = "光影与构图的永恒魅力";
+      const quote = "\"摄影不仅是捕捉瞬间，而是创造永恒。\"";
+      const points = [
+        "01 摄影是光影的艺术，掌握光线是创作好照片的关键",
+        "02 构图是视觉语言，通过空间关系传达情感与故事",
+        "03 数码技术改变了摄影工具，但不改变摄影的本质",
+        "04 真正的摄影眼光将在视觉饱和的时代成为宝贵能力"
+      ];
+      const notes = "在图像泛滥的数字时代，摄影的形式在变，但作为记录与表达的方式，其艺术本质不变。";
+      const date = new Date().toLocaleDateString('zh-CN');
+
+      let cardHtml = '';
+      if(currentStyle === 'scandi'){
+        cardHtml = `
+          <div class="scandi animate-fade-in">
+            <div class="scandi-header">
+              <div class="text-sm text-gray-400 tracking-wider">PHOTOGRAPHIE</div>
+              <div class="text-sm text-gray-400">${date}</div>
+            </div>
+            <h1 class="scandi-title">${title}</h1>
+            <h2 class="scandi-subtitle">${subtitle}</h2>
+            <div class="scandi-line"></div>
+            <blockquote class="scandi-quote">${quote}</blockquote>
+            <ul class="scandi-list">
+              ${points.map(point => {
+                let parts = point.split(' ');
+                let num = parts.shift();
+                return `<li><span>${num}</span><span>${parts.join(' ')}</span></li>`;
+              }).join('')}
+            </ul>
+            <div class="scandi-note">编辑笔记: ${notes}</div>
+            ${qrCodeDataUrl ? `<div class="qr-section"><img src="${qrCodeDataUrl}" alt="QR Code" class="w-32 h-32"></div>` : ''}
+          </div>
+        `;
+      } else if(currentStyle === 'artdeco'){
+        cardHtml = `
+          <div class="artdeco animate-fade-in">
+            <div class="artdeco-content">
+              <div class="artdeco-header">
+                <div class="text-sm tracking-widest">L'ART DE LA PHOTOGRAPHIE</div>
+                <div class="text-sm">${date}</div>
+              </div>
+              <div class="artdeco-border p-6">
+                <h1 class="artdeco-title">${title}</h1>
+                <h2 class="artdeco-subtitle">${subtitle}</h2>
+                <blockquote class="artdeco-quote">${quote}</blockquote>
+                <ul class="artdeco-list">
+                  ${points.map(point => {
+                    let parts = point.split(' ');
+                    let num = parts.shift();
+                    return `<li><span>${num}</span><span>${parts.join(' ')}</span></li>`;
+                  }).join('')}
+                </ul>
+                <div class="artdeco-note">Editor's Note: ${notes}</div>
+              </div>
+            </div>
+            ${qrCodeDataUrl ? `<div class="qr-section"><img src="${qrCodeDataUrl}" alt="QR Code" class="w-32 h-32"></div>` : ''}
+          </div>
+        `;
+      } else {
+        cardHtml = `
+          <div class="${currentStyle} animate-fade-in">
+            <div class="card-date">
+              ${date}
+            </div>
+            <h1 class="card-title">${title}</h1>
+            <h2 class="card-subtitle">${subtitle}</h2>
+            
+            <div class="quote-block">
+              <p>${quote}</p>
+            </div>
+
+            <ul class="points-list">
+              ${points.map(point => `
+                <li>
+                  <i class="fas fa-feather"></i>
+                  <span>${point}</span>
+                </li>
+              `).join('')}
+            </ul>
+
+            <div class="notes-section">
+              <h3 class="font-bold mb-3">编辑笔记</h3>
+              <p>${notes}</p>
+            </div>
+
+            ${qrCodeDataUrl ? `
+              <div class="qr-section">
+                <img src="${qrCodeDataUrl}" alt="QR Code" class="w-32 h-32">
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+      const output = document.getElementById('cardOutput');
+      output.innerHTML = cardHtml;
+      output.classList.remove('hidden');
+    }
+
+    function updatePreviewCard() {
+      const title = document.getElementById('title').value.trim();
+      const subtitle = document.getElementById('subtitle').value.trim();
+      const quote = document.getElementById('quote').value.trim();
+      const points = document.getElementById('points').value.trim();
+      const notes = document.getElementById('notes').value.trim();
+
+      if (!title && !subtitle && !quote && !points && !notes) {
+        generateDefaultCard();
+      } else {
+        generateCard();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+      generateDefaultCard();
+    });
+  </script>
+</body>
+</html>
